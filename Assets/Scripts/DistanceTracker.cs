@@ -8,6 +8,9 @@ public class DistanceTracker : MonoBehaviour
     public TextMeshProUGUI distanceText;
     public TextMeshProUGUI buttonText;
 
+    private int warmupSamples = 5;
+    private int currentSamples = 0;
+
     private bool isTracking = false;
 
     private Vector2 lastPosition;
@@ -34,7 +37,8 @@ public class DistanceTracker : MonoBehaviour
 
     IEnumerator StartTracking()
     {
-        // Pedir permiso
+        currentSamples = 0;
+
         if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation))
         {
             Permission.RequestUserPermission(Permission.FineLocation);
@@ -47,7 +51,7 @@ public class DistanceTracker : MonoBehaviour
             yield break;
         }
 
-        location.Start();
+        location.Start(1f, 0.5f);
 
         int maxWait = 20;
         while (location.status == LocationServiceStatus.Initializing && maxWait > 0)
@@ -62,7 +66,6 @@ public class DistanceTracker : MonoBehaviour
             yield break;
         }
 
-        // Resetear datos
         totalDistance = 0f;
         lastPosition = Vector2.zero;
 
@@ -86,10 +89,25 @@ public class DistanceTracker : MonoBehaviour
     {
         while (isTracking)
         {
-            float lat = location.lastData.latitude;
-            float lon = location.lastData.longitude;
+            var data = location.lastData;
+
+            float lat = data.latitude;
+            float lon = data.longitude;
+            float accuracy = data.horizontalAccuracy;
 
             Vector2 currentPosition = new Vector2(lat, lon);
+
+            //  WARMUP GPS (clave)
+            if (currentSamples < warmupSamples)
+            {
+                lastPosition = currentPosition;
+                currentSamples++;
+
+                Debug.Log("Calentando GPS... " + currentSamples);
+
+                yield return new WaitForSeconds(1);
+                continue;
+            }
 
             if (lastPosition != Vector2.zero)
             {
@@ -98,11 +116,19 @@ public class DistanceTracker : MonoBehaviour
                     currentPosition.x, currentPosition.y
                 );
 
-                //  filtro básico (evita ruido GPS)
-                if (distance > 0.5f && distance < 20f)
+                float minDistance = 2f;
+                float maxDistance = 15f;
+                float maxAccuracy = 8f;
+
+                if (accuracy <= maxAccuracy)
                 {
-                    totalDistance += distance;
+                    if (distance > minDistance && distance < maxDistance)
+                    {
+                        totalDistance += distance;
+                    }
                 }
+
+                Debug.Log($"Dist: {distance:F2} | Acc: {accuracy:F2}");
             }
 
             lastPosition = currentPosition;
