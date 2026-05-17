@@ -116,9 +116,9 @@ public class DistanceTracker : MonoBehaviour
                     currentPosition.x, currentPosition.y
                 );
 
-                float minDistance = 2f;
-                float maxDistance = 15f;
-                float maxAccuracy = 8f;
+                float minDistance = 0.5f;
+                float maxDistance = 30f;
+                float maxAccuracy = 20f;
 
                 if (accuracy <= maxAccuracy)
                 {
