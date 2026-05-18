@@ -6,8 +6,11 @@ public class StoryManager : MonoBehaviour
 
     private StoryNode nodoActual;
 
+    private UIManager uiManager;
+
     void Start()
     {
+        uiManager = GetComponent<UIManager>();
         nodoActual = nodoInicial;
         MostrarNodoActual();
     }
@@ -27,13 +30,7 @@ public class StoryManager : MonoBehaviour
 
     void MostrarNodoActual()
     {
-        Debug.Log("=== NODO ACTUAL ===");
-        Debug.Log(nodoActual.texto);
-
-        for (int i = 0; i < nodoActual.opciones.Length; i++)
-        {
-            Debug.Log($"Opción {i + 1}: {nodoActual.opciones[i].texto} - Costo: {nodoActual.opciones[i].costo}m");
-        }
+        uiManager.MostrarNodo(nodoActual);
     }
 
     public void ElegirOpcion(int indice)
