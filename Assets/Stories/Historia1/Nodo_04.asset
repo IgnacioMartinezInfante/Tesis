@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3c5b198d9582924a92f4fa831eaceaa, type: 3}
   m_Name: Nodo_04
   m_EditorClassIdentifier: 
+  id: 4
   texto: 
   imagen: {fileID: 0}
   opciones: []

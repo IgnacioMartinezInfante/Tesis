@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3c5b198d9582924a92f4fa831eaceaa, type: 3}
   m_Name: Nodo_03
   m_EditorClassIdentifier: 
+  id: 3
   texto: llamasa tus amigos y se ponene a jugar en la calle a la pelota, hasta que
     se te presenta una oportunidad...
   imagen: {fileID: 0}

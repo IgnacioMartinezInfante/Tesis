@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3c5b198d9582924a92f4fa831eaceaa, type: 3}
   m_Name: Nodo_02
   m_EditorClassIdentifier: 
+  id: 2
   texto: hay mucho silencio en el bosque, por lo que decides hacer algo alocado
   imagen: {fileID: 0}
   opciones:
   - texto: trepar un arbol
     costo: 30
     siguienteNodo: {fileID: 11400000, guid: 78b4b282cb4eeb640bd5ae1a364ea001, type: 2}
-  - texto: comerse un hongo
+  - texto: comer un hongo
     costo: 70
     siguienteNodo: {fileID: 11400000, guid: 0a2e4bdd293ff9f458d5ee1a8b01508c, type: 2}

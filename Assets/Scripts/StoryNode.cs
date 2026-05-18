@@ -3,6 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NuevoNodo", menuName = "Historia/Nodo")]
 public class StoryNode : ScriptableObject
 {
+    public int id;
+
     [TextArea(3, 6)]
     public string texto;
 

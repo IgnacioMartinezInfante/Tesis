@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3c5b198d9582924a92f4fa831eaceaa, type: 3}
   m_Name: Nodo_01
   m_EditorClassIdentifier: 
-  texto: te despiertas, sales de la casa y debes elegir que hacer hoy
+  id: 1
+  texto: "Te despiertas, sales de la casa y debes elegir qu\xE9 hacer hoy."
   imagen: {fileID: 0}
   opciones:
   - texto: ir al bosque

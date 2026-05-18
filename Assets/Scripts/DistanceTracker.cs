@@ -8,13 +8,14 @@ public class DistanceTracker : MonoBehaviour
     public TextMeshProUGUI distanceText;
     public TextMeshProUGUI buttonText;
 
-    private int warmupSamples = 5;
+    private int warmupSamples = 10;
     private int currentSamples = 0;
 
     private bool isTracking = false;
 
     private Vector2 lastPosition;
-    private float totalDistance = 0f;
+    public float totalDistance = 0f;
+    public float distanciaAcumulada = 0f;
 
     private LocationService location;
 
@@ -118,13 +119,14 @@ public class DistanceTracker : MonoBehaviour
 
                 float minDistance = 0.5f;
                 float maxDistance = 30f;
-                float maxAccuracy = 20f;
+                float maxAccuracy = 30f;
 
                 if (accuracy <= maxAccuracy)
                 {
                     if (distance > minDistance && distance < maxDistance)
                     {
                         totalDistance += distance;
+                        distanciaAcumulada += distance;
                     }
                 }
 
@@ -154,5 +156,11 @@ public class DistanceTracker : MonoBehaviour
         float c = 2 * Mathf.Atan2(Mathf.Sqrt(a), Mathf.Sqrt(1 - a));
 
         return R * c;
+    }
+
+    public void ResetDistance()
+    {
+        totalDistance = 0f;
+        distanciaAcumulada = 0f;
     }
 }

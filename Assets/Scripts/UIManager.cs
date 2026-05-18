@@ -15,6 +15,11 @@ public class UIManager : MonoBehaviour
     public Button botonOpcion1;
     public Button botonOpcion2;
 
+    [Header("Distancia")]
+    public TextMeshProUGUI textoDistancia;
+    public TextMeshProUGUI textoObjetivo;
+    public Button botonSimular;
+
     private StoryManager storyManager;
 
     void Start()
@@ -23,6 +28,7 @@ public class UIManager : MonoBehaviour
 
         botonOpcion1.onClick.AddListener(() => storyManager.ElegirOpcion(0));
         botonOpcion2.onClick.AddListener(() => storyManager.ElegirOpcion(1));
+        botonSimular.onClick.AddListener(() => storyManager.CompletarDistancia());
 
         MostrarPantallaHistoria();
     }
@@ -40,9 +46,15 @@ public class UIManager : MonoBehaviour
         pantallaDistancia.SetActive(false);
     }
 
-    public void MostrarPantallaDistancia()
+    public void MostrarPantallaDistancia(int costo)
     {
+        textoObjetivo.text = "Objetivo: " + costo + "m";
         pantallaHistoria.SetActive(false);
         pantallaDistancia.SetActive(true);
+    }
+
+    public void ActualizarDistancia(float actual, float objetivo)
+    {
+        textoObjetivo.text = $"Objetivo: {actual:F0}m / {objetivo}m";
     }
 }
