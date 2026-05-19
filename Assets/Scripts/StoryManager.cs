@@ -14,9 +14,10 @@ public class StoryManager : MonoBehaviour
     private DistanceTracker distanceTracker;
     private SaveSystem saveSystem;
 
+    private float tiempoGuardado = 0f;
+
     void Start()
     {
-        PlayerPrefs.DeleteAll();
         Debug.Log("1 - StoryManager Start");
         uiManager = GetComponent<UIManager>();
         Debug.Log("2 - UIManager: " + (uiManager != null));
@@ -48,20 +49,19 @@ public class StoryManager : MonoBehaviour
     {
         if (esperandoDistancia)
         {
-            // Actualizar UI
             uiManager.ActualizarDistancia(distanceTracker.distanciaAcumulada, costoPendiente);
 
-            //  GUARDAR progreso en tiempo real
-            saveSystem.GuardarProgreso(nodoPendiente.id, distanceTracker.distanciaAcumulada);
+            tiempoGuardado += Time.deltaTime;
+            if (tiempoGuardado >= 5f)
+            {
+                tiempoGuardado = 0f;
+                saveSystem.GuardarProgreso(nodoPendiente.id, distanceTracker.distanciaAcumulada);
+            }
 
-            // Chequear si completó
             if (distanceTracker.distanciaAcumulada >= costoPendiente)
             {
                 esperandoDistancia = false;
-
-                //  borrar progreso porque ya terminó este nodo
                 saveSystem.BorrarProgreso();
-
                 CompletarDistancia();
             }
         }
@@ -75,11 +75,12 @@ public class StoryManager : MonoBehaviour
         nodoPendiente = opcionElegida.siguienteNodo;
         costoPendiente = opcionElegida.costo;
 
-        distanceTracker.ResetDistance();
+        // Reseteamos distanciaAcumulada solo acá, controlado
+        distanceTracker.totalDistance = 0f;
+        distanceTracker.distanciaAcumulada = 0f;
+
         esperandoDistancia = true;
-
         saveSystem.GuardarProgreso(nodoPendiente.id, 0f);
-
         uiManager.MostrarPantallaDistancia(costoPendiente);
     }
 
@@ -95,16 +96,20 @@ public class StoryManager : MonoBehaviour
         Debug.Log("Cargando partida...");
         int nodoId = saveSystem.CargarNodoId();
         float distanciaGuardada = saveSystem.CargarDistancia();
-        Debug.Log($"NodoId guardado: {nodoId} | Distancia guardada: {distanciaGuardada}");
+        Debug.Log($"NodoId guardado: {nodoId} | Distancia: {distanciaGuardada}");
 
         foreach (StoryNode nodo in todosLosNodos)
         {
+            Debug.Log($"Comparando nodo id: {nodo.id} con {nodoId}");
             if (nodo.id == nodoId)
             {
                 nodoPendiente = nodo;
+                Debug.Log($"Nodo encontrado: {nodo.id}");
                 break;
             }
         }
+
+        Debug.Log($"nodoPendiente null: {nodoPendiente == null}");
 
         if (nodoPendiente == null)
         {
@@ -116,21 +121,25 @@ public class StoryManager : MonoBehaviour
             return;
         }
 
-        // Buscar el costo de la opción que lleva a nodoPendiente
+        Debug.Log("Buscando costo...");
         bool encontrado = false;
         foreach (StoryNode nodo in todosLosNodos)
         {
             if (encontrado) break;
             foreach (Opcion opcion in nodo.opciones)
             {
+                Debug.Log($"Revisando opcion que va a nodo: {opcion.siguienteNodo?.id}");
                 if (opcion.siguienteNodo != null && opcion.siguienteNodo.id == nodoPendiente.id)
                 {
                     costoPendiente = opcion.costo;
                     encontrado = true;
+                    Debug.Log($"Costo encontrado: {costoPendiente}");
                     break;
                 }
             }
         }
+
+        Debug.Log($"Costo pendiente: {costoPendiente} | Encontrado: {encontrado}");
 
         if (costoPendiente == 0)
         {
@@ -143,8 +152,18 @@ public class StoryManager : MonoBehaviour
         }
 
         distanceTracker.distanciaAcumulada = distanciaGuardada;
+        distanceTracker.totalDistance = 0f;
         esperandoDistancia = true;
-        Debug.Log($"Partida cargada - Costo pendiente: {costoPendiente}");
+        Debug.Log("Mostrando pantalla distancia");
         uiManager.MostrarPantallaDistancia(costoPendiente);
+        Debug.Log("CargarPartida terminado");
+    }
+    void OnApplicationPause(bool pausado)
+    {
+        if (pausado && esperandoDistancia)
+        {
+            saveSystem.GuardarProgreso(nodoPendiente.id, distanceTracker.distanciaAcumulada);
+            Debug.Log("Progreso guardado al pausar");
+        }
     }
 }

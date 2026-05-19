@@ -161,6 +161,5 @@ public class DistanceTracker : MonoBehaviour
     public void ResetDistance()
     {
         totalDistance = 0f;
-        distanciaAcumulada = 0f;
     }
 }

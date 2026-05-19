@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
@@ -25,11 +26,9 @@ public class UIManager : MonoBehaviour
     void Start()
     {
         storyManager = GetComponent<StoryManager>();
-
         botonOpcion1.onClick.AddListener(() => storyManager.ElegirOpcion(0));
         botonOpcion2.onClick.AddListener(() => storyManager.ElegirOpcion(1));
         botonSimular.onClick.AddListener(() => storyManager.CompletarDistancia());
-
         MostrarPantallaHistoria();
     }
 
@@ -49,7 +48,14 @@ public class UIManager : MonoBehaviour
     public void MostrarPantallaDistancia(int costo)
     {
         textoObjetivo.text = "Objetivo: " + costo + "m";
+        StartCoroutine(MostrarPantallaDistanciaCoroutine());
+    }
+
+    private IEnumerator MostrarPantallaDistanciaCoroutine()
+    {
+        yield return null;
         pantallaHistoria.SetActive(false);
+        yield return null;
         pantallaDistancia.SetActive(true);
     }
 
