@@ -20,6 +20,10 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI textoDistancia;
     public TextMeshProUGUI textoObjetivo;
     public Button botonSimular;
+    public Button botonReset;
+
+    private SaveSystem saveSystem;
+    private DistanceTracker distanceTracker;
 
     private StoryManager storyManager;
 
@@ -30,6 +34,15 @@ public class UIManager : MonoBehaviour
         botonOpcion2.onClick.AddListener(() => storyManager.ElegirOpcion(1));
         botonSimular.onClick.AddListener(() => storyManager.CompletarDistancia());
         MostrarPantallaHistoria();
+
+        saveSystem = GetComponent<SaveSystem>();
+        distanceTracker = GetComponent<DistanceTracker>();
+        botonReset.onClick.AddListener(() => {
+            saveSystem.BorrarProgreso();
+            distanceTracker.totalDistance = 0f;
+            distanceTracker.distanciaAcumulada = 0f;
+            storyManager.ReiniciarJuego();
+        });
     }
 
     public void MostrarNodo(StoryNode nodo)

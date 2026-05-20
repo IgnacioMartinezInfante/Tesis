@@ -166,4 +166,14 @@ public class StoryManager : MonoBehaviour
             Debug.Log("Progreso guardado al pausar");
         }
     }
+
+    public void ReiniciarJuego()
+    {
+        esperandoDistancia = false;
+        nodoPendiente = null;
+        costoPendiente = 0;
+        nodoActual = nodoInicial;
+        uiManager.MostrarNodo(nodoActual);
+        uiManager.MostrarPantallaHistoria();
+    }
 }
