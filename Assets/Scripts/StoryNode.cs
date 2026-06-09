@@ -11,6 +11,8 @@ public class StoryNode : ScriptableObject
     public Sprite imagen;
 
     public Opcion[] opciones;
+
+    public bool EsFinal => opciones == null || opciones.Length == 0;
 }
 
 [System.Serializable]

@@ -22,6 +22,11 @@ public class UIManager : MonoBehaviour
     public Button botonSimular;
     public Button botonReset;
 
+    [Header("Final")]
+    public GameObject pantallaFinal;
+    public TextMeshProUGUI textoFinal;
+    public Button botonReiniciar;
+
     private SaveSystem saveSystem;
     private DistanceTracker distanceTracker;
 
@@ -43,6 +48,8 @@ public class UIManager : MonoBehaviour
             distanceTracker.distanciaAcumulada = 0f;
             storyManager.ReiniciarJuego();
         });
+
+        botonReiniciar.onClick.AddListener(() => storyManager.ReiniciarJuego());
     }
 
     public void MostrarNodo(StoryNode nodo)
@@ -56,12 +63,14 @@ public class UIManager : MonoBehaviour
     {
         pantallaHistoria.SetActive(true);
         pantallaDistancia.SetActive(false);
+        pantallaFinal.SetActive(false);
     }
 
     public void MostrarPantallaDistancia(int costo)
     {
         textoObjetivo.text = "Objetivo: " + costo + "m";
         StartCoroutine(MostrarPantallaDistanciaCoroutine());
+        pantallaFinal.SetActive(false);
     }
 
     private IEnumerator MostrarPantallaDistanciaCoroutine()
@@ -70,6 +79,14 @@ public class UIManager : MonoBehaviour
         pantallaHistoria.SetActive(false);
         yield return null;
         pantallaDistancia.SetActive(true);
+    }
+    
+    public void MostrarPantallaFinal(string texto)
+    {
+        textoFinal.text = texto;
+        pantallaHistoria.SetActive(false);
+        pantallaDistancia.SetActive(false);
+        pantallaFinal.SetActive(true);
     }
 
     public void ActualizarDistancia(float actual, float objetivo)

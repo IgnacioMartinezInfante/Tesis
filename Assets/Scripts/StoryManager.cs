@@ -87,8 +87,16 @@ public class StoryManager : MonoBehaviour
     public void CompletarDistancia()
     {
         nodoActual = nodoPendiente;
-        uiManager.MostrarNodo(nodoActual);
-        uiManager.MostrarPantallaHistoria();
+
+        if (nodoActual.EsFinal)
+        {
+            uiManager.MostrarPantallaFinal(nodoActual.texto);
+        }
+        else
+        {
+            uiManager.MostrarNodo(nodoActual);
+            uiManager.MostrarPantallaHistoria();
+        }
     }
 
     void CargarPartida()

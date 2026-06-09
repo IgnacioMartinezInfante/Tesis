@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Nodo_05
   m_EditorClassIdentifier: 
   id: 5
-  texto: 
+  texto: pepe
   imagen: {fileID: 0}
   opciones: []

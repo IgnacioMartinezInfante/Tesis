@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Nodo_04
   m_EditorClassIdentifier: 
   id: 4
-  texto: 
+  texto: alcansaste el fin del juego!
   imagen: {fileID: 0}
   opciones: []
