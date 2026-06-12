@@ -22,6 +22,11 @@ public class UIManager : MonoBehaviour
     public Button botonSimular;
     public Button botonReset;
 
+    [Header("Objetivo")]
+    public GameObject pantallaObjetivo;
+    public TextMeshProUGUI textoDistanciaRecorrida;
+    public Button botonContinuar;
+
     [Header("Final")]
     public GameObject pantallaFinal;
     public TextMeshProUGUI textoFinal;
@@ -35,13 +40,15 @@ public class UIManager : MonoBehaviour
     void Start()
     {
         storyManager = GetComponent<StoryManager>();
-        botonOpcion1.onClick.AddListener(() => storyManager.ElegirOpcion(0));
-        botonOpcion2.onClick.AddListener(() => storyManager.ElegirOpcion(1));
-        botonSimular.onClick.AddListener(() => storyManager.CompletarDistancia());
-        MostrarPantallaHistoria();
-
         saveSystem = GetComponent<SaveSystem>();
         distanceTracker = GetComponent<DistanceTracker>();
+
+        botonOpcion1.onClick.AddListener(() => storyManager.ElegirOpcion(0));
+        botonOpcion2.onClick.AddListener(() => storyManager.ElegirOpcion(1));
+        botonSimular.onClick.AddListener(() => storyManager.CompletarObjetivo());
+        botonContinuar.onClick.AddListener(() => storyManager.CompletarDistancia());
+        botonReiniciar.onClick.AddListener(() => storyManager.ReiniciarJuego());
+
         botonReset.onClick.AddListener(() => {
             saveSystem.BorrarProgreso();
             distanceTracker.totalDistance = 0f;
@@ -49,7 +56,7 @@ public class UIManager : MonoBehaviour
             storyManager.ReiniciarJuego();
         });
 
-        botonReiniciar.onClick.AddListener(() => storyManager.ReiniciarJuego());
+        MostrarPantallaHistoria();
     }
 
     public void MostrarNodo(StoryNode nodo)
@@ -64,6 +71,7 @@ public class UIManager : MonoBehaviour
         pantallaHistoria.SetActive(true);
         pantallaDistancia.SetActive(false);
         pantallaFinal.SetActive(false);
+        pantallaObjetivo.SetActive(false);
     }
 
     public void MostrarPantallaDistancia(int costo)
@@ -71,6 +79,7 @@ public class UIManager : MonoBehaviour
         textoObjetivo.text = "Objetivo: " + costo + "m";
         StartCoroutine(MostrarPantallaDistanciaCoroutine());
         pantallaFinal.SetActive(false);
+        pantallaObjetivo.SetActive(false);
     }
 
     private IEnumerator MostrarPantallaDistanciaCoroutine()
@@ -80,12 +89,22 @@ public class UIManager : MonoBehaviour
         yield return null;
         pantallaDistancia.SetActive(true);
     }
-    
+
+    public void MostrarPantallaObjetivo(float distancia)
+    {
+        textoDistanciaRecorrida.text = $"Has recorrido {distancia:F0} metros";
+        pantallaHistoria.SetActive(false);
+        pantallaDistancia.SetActive(false);
+        pantallaFinal.SetActive(false);
+        pantallaObjetivo.SetActive(true);
+    }
+
     public void MostrarPantallaFinal(string texto)
     {
         textoFinal.text = texto;
         pantallaHistoria.SetActive(false);
         pantallaDistancia.SetActive(false);
+        pantallaObjetivo.SetActive(false);
         pantallaFinal.SetActive(true);
     }
 

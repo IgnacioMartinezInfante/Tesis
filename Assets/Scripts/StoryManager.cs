@@ -62,7 +62,7 @@ public class StoryManager : MonoBehaviour
             {
                 esperandoDistancia = false;
                 saveSystem.BorrarProgreso();
-                CompletarDistancia();
+                uiManager.MostrarPantallaObjetivo(distanceTracker.distanciaAcumulada);
             }
         }
     }
@@ -98,6 +98,11 @@ public class StoryManager : MonoBehaviour
             uiManager.MostrarPantallaHistoria();
         }
     }
+    public void CompletarObjetivo()
+    {
+        uiManager.MostrarPantallaObjetivo(costoPendiente);
+    }
+
 
     void CargarPartida()
     {
