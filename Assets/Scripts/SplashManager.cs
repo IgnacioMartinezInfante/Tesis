@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class SplashManager : MonoBehaviour
 {
@@ -8,15 +9,21 @@ public class SplashManager : MonoBehaviour
 
     void Start()
     {
-        // Si hay progreso guardado, ir directo al juego
         if (PlayerPrefs.HasKey("estadoJuego"))
         {
-            SceneManager.LoadScene("Juego");
-            return;
-        }
+            botonComenzar.GetComponentInChildren<TextMeshProUGUI>().text = "Continuar";
 
-        botonComenzar.onClick.AddListener(() => {
-            SceneManager.LoadScene("SeleccionHistorias");
-        });
+            botonComenzar.onClick.AddListener(() => {
+                SceneManager.LoadScene("Juego");
+            });
+        }
+        else
+        {
+            botonComenzar.GetComponentInChildren<TextMeshProUGUI>().text = "Comenzar";
+
+            botonComenzar.onClick.AddListener(() => {
+                SceneManager.LoadScene("SeleccionHistorias");
+            });
+        }
     }
 }
