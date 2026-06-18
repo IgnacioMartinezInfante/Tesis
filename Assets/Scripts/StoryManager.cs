@@ -217,7 +217,7 @@ public class StoryManager : MonoBehaviour
             case EstadoJuego.ObjetivoCompletado:
                 esperandoDistancia = false;
                 objetivoCompletado = true;
-                uiManager.MostrarPantallaObjetivo(distanceTracker.distanciaAcumulada);
+                uiManager.MostrarPantallaObjetivo(costoPendiente);
                 GuardarEstadoActual();
                 break;
 
