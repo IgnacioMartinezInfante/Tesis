@@ -8,6 +8,13 @@ public class SplashManager : MonoBehaviour
 
     void Start()
     {
+        // Si hay progreso guardado, ir directo al juego
+        if (PlayerPrefs.HasKey("estadoJuego"))
+        {
+            SceneManager.LoadScene("Juego");
+            return;
+        }
+
         botonComenzar.onClick.AddListener(() => {
             SceneManager.LoadScene("SeleccionHistorias");
         });

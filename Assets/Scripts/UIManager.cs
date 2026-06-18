@@ -48,7 +48,6 @@ public class UIManager : MonoBehaviour
         botonSimular.onClick.AddListener(() => storyManager.CompletarObjetivo());
         botonContinuar.onClick.AddListener(() => storyManager.CompletarDistancia());
         botonReiniciar.onClick.AddListener(() => storyManager.ReiniciarJuego());
-
         botonReset.onClick.AddListener(() => {
             saveSystem.BorrarProgreso();
             distanceTracker.totalDistance = 0f;
@@ -56,7 +55,11 @@ public class UIManager : MonoBehaviour
             storyManager.ReiniciarJuego();
         });
 
-        MostrarPantallaHistoria();
+        // Ocultamos todo al arrancar, StoryManager decide qué mostrar
+        pantallaHistoria.SetActive(false);
+        pantallaDistancia.SetActive(false);
+        pantallaFinal.SetActive(false);
+        pantallaObjetivo.SetActive(false);
     }
 
     public void MostrarNodo(StoryNode nodo)
@@ -68,10 +71,17 @@ public class UIManager : MonoBehaviour
 
     public void MostrarPantallaHistoria()
     {
-        pantallaHistoria.SetActive(true);
+        StartCoroutine(MostrarPantallaHistoriaCoroutine());
+    }
+
+    private IEnumerator MostrarPantallaHistoriaCoroutine()
+    {
+        yield return null;
         pantallaDistancia.SetActive(false);
         pantallaFinal.SetActive(false);
         pantallaObjetivo.SetActive(false);
+        yield return null;
+        pantallaHistoria.SetActive(true);
     }
 
     public void MostrarPantallaDistancia(int costo)
@@ -92,19 +102,35 @@ public class UIManager : MonoBehaviour
 
     public void MostrarPantallaObjetivo(float distancia)
     {
+        Debug.Log($"MostrarPantallaObjetivo llamado - distancia: {distancia}");
         textoDistanciaRecorrida.text = $"Has recorrido {distancia:F0} metros";
+        StartCoroutine(MostrarPantallaObjetivoCoroutine());
+    }
+
+    private IEnumerator MostrarPantallaObjetivoCoroutine()
+    {
+        yield return null;
         pantallaHistoria.SetActive(false);
         pantallaDistancia.SetActive(false);
         pantallaFinal.SetActive(false);
+        yield return null;
         pantallaObjetivo.SetActive(true);
+        Debug.Log($"pantallaObjetivo activa: {pantallaObjetivo.activeSelf}");
     }
 
     public void MostrarPantallaFinal(string texto)
     {
         textoFinal.text = texto;
+        StartCoroutine(MostrarPantallaFinalCoroutine());
+    }
+
+    private IEnumerator MostrarPantallaFinalCoroutine()
+    {
+        yield return null;
         pantallaHistoria.SetActive(false);
         pantallaDistancia.SetActive(false);
         pantallaObjetivo.SetActive(false);
+        yield return null;
         pantallaFinal.SetActive(true);
     }
 
