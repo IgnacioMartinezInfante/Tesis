@@ -2,12 +2,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
     [Header("Pantallas")]
     public GameObject pantallaHistoria;
     public GameObject pantallaDistancia;
+    public Button botonMenu;
 
     [Header("Historia")]
     public TextMeshProUGUI textoNodo;
@@ -42,6 +44,7 @@ public class UIManager : MonoBehaviour
         storyManager = GetComponent<StoryManager>();
         saveSystem = GetComponent<SaveSystem>();
         distanceTracker = GetComponent<DistanceTracker>();
+        botonMenu.onClick.AddListener(IrAMenuHistorias);
 
         botonOpcion1.onClick.AddListener(() => storyManager.ElegirOpcion(0));
         botonOpcion2.onClick.AddListener(() => storyManager.ElegirOpcion(1));
@@ -137,5 +140,12 @@ public class UIManager : MonoBehaviour
     public void ActualizarDistancia(float actual, float objetivo)
     {
         textoObjetivo.text = $"Objetivo: {actual:F0}m / {objetivo}m";
+    }
+
+    void IrAMenuHistorias()
+    {
+        PlayerPrefs.SetInt("sesionActiva", 0);
+        PlayerPrefs.Save();
+        SceneManager.LoadScene("SeleccionHistorias");
     }
 }

@@ -34,6 +34,9 @@ public class StoryManager : MonoBehaviour
             NuevaPartida();
         }
 
+        PlayerPrefs.SetInt("sesionActiva", 1);
+        PlayerPrefs.Save();
+
         inicializado = true;
     }
 
