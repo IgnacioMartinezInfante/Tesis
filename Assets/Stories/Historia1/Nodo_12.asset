@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3c5b198d9582924a92f4fa831eaceaa, type: 3}
+  m_Name: Nodo_12
+  m_EditorClassIdentifier: 
+  id: 7
+  texto: "Lleg\xE1s a un departamento en el cuarto piso.\n\nLa puerta est\xE1 entreabierta.\n\nAdentro,
+    una mujer con documentos sobre la mesa.\n\nFotos. Registros. Tu nombre aparece
+    en varios.\n\n\u2014\"Llevamos dos a\xF1os armando esto.\n\nSolo nos faltaba
+    la grabaci\xF3n.\"\n\nTe muestra algo en su pantalla:\n\nuna orden de arresto...
+    para tu superior."
+  imagen: {fileID: 0}
+  opciones:
+  - texto: "Entregar la grabaci\xF3n"
+    costo: 200
+    siguienteNodo: {fileID: 11400000, guid: 65fd7e753779a0448b9fd9921583aaf9, type: 2}
+  - texto: Pedir explicaciones primero
+    costo: 150
+    siguienteNodo: {fileID: 11400000, guid: 6ea0065181009634f8f6034b7eb8f7d6, type: 2}

@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: Nodo_05
   m_EditorClassIdentifier: 
   id: 5
-  texto: pepe
+  texto: "Abr\xEDs el celular.\n\nUna app se activa sola.\n\nGPS activado.\n\nEn
+    diez segundos, tres patrullas rodean el lugar.\n\nEl celular ten\xEDa una trampa.\n\nTe
+    detienen sin resistencia.\n\nMientras te llevan, entend\xE9s:\n\nel celular era
+    el anzuelo.\n\nVos ca\xEDste.\n\nFINAL: Ca\xEDste en la trampa\n\nNunca supiste
+    lo que hab\xEDa en esa grabaci\xF3n. Alguien m\xE1s lo usar\xE1 para sus propios
+    fines. Caso cerrado... para ellos."
   imagen: {fileID: 0}
   opciones: []

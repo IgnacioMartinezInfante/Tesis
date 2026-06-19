@@ -13,6 +13,14 @@ MonoBehaviour:
   m_Name: Nodo_06
   m_EditorClassIdentifier: 
   id: 6
-  texto: 
+  texto: "Corr\xE9s.\n\nLas sirenas se alejan.\n\nTu celular vibra:\n\n\"Te quedan
+    20 minutos antes de que bloqueen la ciudad.\"\n\nN\xFAmero desconocido.\n\nEl
+    mismo que te avis\xF3 antes."
   imagen: {fileID: 0}
-  opciones: []
+  opciones:
+  - texto: Responder el mensaje
+    costo: 150
+    siguienteNodo: {fileID: 11400000, guid: 2e498f646797c0545877d5500bdd80ef, type: 2}
+  - texto: Ignorarlo y buscar refugio solo
+    costo: 200
+    siguienteNodo: {fileID: 11400000, guid: e108d1054fa0fd04aa22b753b6e22980, type: 2}

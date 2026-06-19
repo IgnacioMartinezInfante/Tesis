@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Nodo_03
   m_EditorClassIdentifier: 
   id: 3
-  texto: llamasa tus amigos y se ponene a jugar en la calle a la pelota, hasta que
-    se te presenta una oportunidad...
+  texto: "\u2014\"No te muevas.\"\n\nSilencio.\n\n\u2014\"Ya sabemos que fuiste vos.\"\n\nTe
+    corta.\n\nMensaje nuevo, n\xFAmero desconocido:\n\n\"No conf\xEDes en \xE9l.
+    Corr\xE9.\"\n\n"
   imagen: {fileID: 0}
   opciones:
-  - texto: patear la pelota hacia la chica que te gusta
-    costo: 80
+  - texto: 'Escapar '
+    costo: 250
     siguienteNodo: {fileID: 11400000, guid: 95997f81704a1ea41b49bc172577958c, type: 2}
-  - texto: patear la pelota hacia la cara de tu amigo
-    costo: 40
+  - texto: Quedarte e intentar explicar
+    costo: 150
     siguienteNodo: {fileID: 11400000, guid: 733cc0b58afec8c4886474544f4abf25, type: 2}

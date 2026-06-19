@@ -13,6 +13,14 @@ MonoBehaviour:
   m_Name: Nodo_04
   m_EditorClassIdentifier: 
   id: 4
-  texto: alcansaste el fin del juego!
+  texto: "Sal\xEDs antes de que lleguen m\xE1s patrullas.\n\nEn la calle, abr\xEDs
+    el celular.\n\nHay una sola grabaci\xF3n de audio.\n\nFecha: hace tres d\xEDas.\n\nTu
+    voz. Y otra que reconoc\xE9s.\n\nTu superior.\n\nEst\xE1n hablando de vos."
   imagen: {fileID: 0}
-  opciones: []
+  opciones:
+  - texto: "Escuchar la grabaci\xF3n completa "
+    costo: 200
+    siguienteNodo: {fileID: 11400000, guid: f6e9f00d0289d2c408cf61bcd61a258f, type: 2}
+  - texto: Ir directo a buscar a alguien de confianza
+    costo: 200
+    siguienteNodo: {fileID: 11400000, guid: 2e498f646797c0545877d5500bdd80ef, type: 2}

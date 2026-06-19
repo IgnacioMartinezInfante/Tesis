@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3c5b198d9582924a92f4fa831eaceaa, type: 3}
+  m_Name: Nodo_13
+  m_EditorClassIdentifier: 
+  id: 7
+  texto: "Verific\xE1s.\n\nEl n\xFAmero pertenece a una investigadora independiente.\n\nSin
+    v\xEDnculos con tu superior.\n\nDos a\xF1os trabajando el mismo caso.\n\nElla
+    tiene todo excepto la prueba de audio.\n\nVos ten\xE9s exactamente eso."
+  imagen: {fileID: 0}
+  opciones:
+  - texto: ' Ir a encontrarla'
+    costo: 250
+    siguienteNodo: {fileID: 11400000, guid: 651a84e758ef07340a750af2cdc21ea2, type: 2}
+  - texto: "Ir directo a la fiscal\xEDa con ella"
+    costo: 300
+    siguienteNodo: {fileID: 11400000, guid: 65fd7e753779a0448b9fd9921583aaf9, type: 2}

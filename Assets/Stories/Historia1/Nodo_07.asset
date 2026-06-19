@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: Nodo_07
   m_EditorClassIdentifier: 
   id: 7
-  texto: 
+  texto: "Intent\xE1s hablar.\n\nTu superior escucha.\n\nAsiente.\n\nDemasiado tranquilo.\n\n\u2014\"Bien.
+    Ven\xED conmigo.\"\n\nNo es una invitaci\xF3n.\n\nEs una orden.\n\nMientras camin\xE1s
+    detr\xE1s de \xE9l, ves que saca el tel\xE9fono.\n\nManda un mensaje.\n\nUna
+    patrulla aparece por la esquina.\n\nFINAL: Confiaste en el equivocado\n\nTu superior
+    ya sab\xEDa todo. Al quedarte, le diste exactamente lo que necesitaba: tiempo
+    para borrar las pruebas y entregarte como culpable. Nunca tuviste una oportunidad."
   imagen: {fileID: 0}
   opciones: []
