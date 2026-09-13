@@ -1,12 +1,12 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.Android;
-using TMPro;
 
 public class DistanceTracker : MonoBehaviour
 {
-    public TextMeshProUGUI distanceText;
-    public TextMeshProUGUI buttonText;
+    public bool autoIniciarTracking = true;
+
+    public event System.Action<float> OnDistanciaActualizada;
 
     private int warmupSamples = 10;
     private int currentSamples = 0;
@@ -22,19 +22,18 @@ public class DistanceTracker : MonoBehaviour
     void Start()
     {
         location = Input.location;
-    }
+        if (PlayerPrefs.HasKey("distanciaAcumulada"))
+        {
+            distanciaAcumulada = PlayerPrefs.GetFloat("distanciaAcumulada", 0f);
+        }
+        OnDistanciaActualizada?.Invoke(distanciaAcumulada);
 
-    public void ToggleTracking()
-    {
-        if (!isTracking)
+        if (autoIniciarTracking)
         {
             StartCoroutine(StartTracking());
         }
-        else
-        {
-            StopTracking();
-        }
     }
+
 
     IEnumerator StartTracking()
     {
@@ -71,8 +70,6 @@ public class DistanceTracker : MonoBehaviour
         lastPosition = Vector2.zero;
 
         isTracking = true;
-        buttonText.text = "Stop";
-
         StartCoroutine(UpdateDistance());
     }
 
@@ -80,9 +77,6 @@ public class DistanceTracker : MonoBehaviour
     {
         isTracking = false;
         location.Stop();
-
-        buttonText.text = "Start";
-
         Debug.Log("Distancia final: " + totalDistance + " metros");
     }
 
@@ -127,6 +121,8 @@ public class DistanceTracker : MonoBehaviour
                     {
                         totalDistance += distance;
                         distanciaAcumulada += distance;
+                        PlayerPrefs.SetFloat("distanciaAcumulada", distanciaAcumulada);
+                        OnDistanciaActualizada?.Invoke(distanciaAcumulada);
                     }
                 }
 
@@ -134,9 +130,6 @@ public class DistanceTracker : MonoBehaviour
             }
 
             lastPosition = currentPosition;
-
-            distanceText.text = "Distancia: " + totalDistance.ToString("F1") + " m";
-
             yield return new WaitForSeconds(1);
         }
     }
@@ -158,8 +151,42 @@ public class DistanceTracker : MonoBehaviour
         return R * c;
     }
 
+    public bool TieneMetrosSuficientes(float metrosRequeridos)
+    {
+        return distanciaAcumulada >= metrosRequeridos;
+    }
+
+    public bool ConsumirMetros(float metrosAConsumir)
+    {
+        if (distanciaAcumulada >= metrosAConsumir)
+        {
+            distanciaAcumulada -= metrosAConsumir;
+            PlayerPrefs.SetFloat("distanciaAcumulada", distanciaAcumulada);
+            PlayerPrefs.Save();
+            OnDistanciaActualizada?.Invoke(distanciaAcumulada);
+            return true;
+        }
+        return false;
+    }
+
+    public void AgregarMetros(float metros)
+    {
+        if (metros > 0f)
+        {
+            distanciaAcumulada += metros;
+            totalDistance += metros;
+            PlayerPrefs.SetFloat("distanciaAcumulada", distanciaAcumulada);
+            PlayerPrefs.Save();
+            OnDistanciaActualizada?.Invoke(distanciaAcumulada);
+        }
+    }
+
     public void ResetDistance()
     {
         totalDistance = 0f;
+        distanciaAcumulada = 0f;
+        PlayerPrefs.SetFloat("distanciaAcumulada", 0f);
+        PlayerPrefs.Save();
+        OnDistanciaActualizada?.Invoke(distanciaAcumulada);
     }
 }

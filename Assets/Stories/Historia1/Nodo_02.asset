@@ -21,6 +21,6 @@ MonoBehaviour:
   - texto: Guardar el celular y salir
     costo: 150
     siguienteNodo: {fileID: 11400000, guid: 78b4b282cb4eeb640bd5ae1a364ea001, type: 2}
-  - texto: comer un hongo
+  - texto: Abrirlo ahora
     costo: 100
     siguienteNodo: {fileID: 11400000, guid: 0a2e4bdd293ff9f458d5ee1a8b01508c, type: 2}

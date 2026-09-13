@@ -8,7 +8,7 @@ public class UIManager : MonoBehaviour
 {
     [Header("Pantallas")]
     public GameObject pantallaHistoria;
-    public GameObject pantallaDistancia;
+    public GameObject pantallaFinal;
     public Button botonMenu;
 
     [Header("Historia")]
@@ -18,25 +18,22 @@ public class UIManager : MonoBehaviour
     public Button botonOpcion1;
     public Button botonOpcion2;
 
-    [Header("Distancia")]
-    public TextMeshProUGUI textoDistancia;
-    public TextMeshProUGUI textoObjetivo;
-    public Button botonSimular;
+    [Header("Billetera de Metros")]
+    public TextMeshProUGUI textoBilleteraMetros;
+    public Button botonSimularMetros; // Bot√≥n opcional para sumar metros (+50m) en pruebas
     public Button botonReset;
 
-    [Header("Objetivo")]
-    public GameObject pantallaObjetivo;
-    public TextMeshProUGUI textoDistanciaRecorrida;
-    public Button botonContinuar;
+    [Header("Alerta Metros Insuficientes")]
+    public GameObject panelAlertaMetros;
+    public TextMeshProUGUI textoAlertaMetros;
+    public Button botonCerrarAlerta;
 
     [Header("Final")]
-    public GameObject pantallaFinal;
     public TextMeshProUGUI textoFinal;
     public Button botonReiniciar;
 
     private SaveSystem saveSystem;
     private DistanceTracker distanceTracker;
-
     private StoryManager storyManager;
 
     void Start()
@@ -44,32 +41,53 @@ public class UIManager : MonoBehaviour
         storyManager = GetComponent<StoryManager>();
         saveSystem = GetComponent<SaveSystem>();
         distanceTracker = GetComponent<DistanceTracker>();
-        botonMenu.onClick.AddListener(IrAMenuHistorias);
 
-        botonOpcion1.onClick.AddListener(() => storyManager.ElegirOpcion(0));
-        botonOpcion2.onClick.AddListener(() => storyManager.ElegirOpcion(1));
-        botonSimular.onClick.AddListener(() => storyManager.CompletarObjetivo());
-        botonContinuar.onClick.AddListener(() => storyManager.CompletarDistancia());
-        botonReiniciar.onClick.AddListener(() => storyManager.ReiniciarJuego());
-        botonReset.onClick.AddListener(() => {
-            saveSystem.BorrarProgreso();
-            distanceTracker.totalDistance = 0f;
-            distanceTracker.distanciaAcumulada = 0f;
-            storyManager.ReiniciarJuego();
-        });
+        if (botonMenu != null) botonMenu.onClick.AddListener(IrAMenuHistorias);
+        if (botonOpcion1 != null) botonOpcion1.onClick.AddListener(() => storyManager.ElegirOpcion(0));
+        if (botonOpcion2 != null) botonOpcion2.onClick.AddListener(() => storyManager.ElegirOpcion(1));
+        if (botonReiniciar != null) botonReiniciar.onClick.AddListener(() => storyManager.ReiniciarJuego());
+        if (botonCerrarAlerta != null) botonCerrarAlerta.onClick.AddListener(OcultarAlertaMetros);
 
-        // Ocultamos todo al arrancar, StoryManager decide quÈ mostrar
-        pantallaHistoria.SetActive(false);
-        pantallaDistancia.SetActive(false);
-        pantallaFinal.SetActive(false);
-        pantallaObjetivo.SetActive(false);
+        if (botonSimularMetros != null)
+        {
+            botonSimularMetros.onClick.AddListener(() => distanceTracker.AgregarMetros(50f));
+        }
+
+        if (botonReset != null)
+        {
+            botonReset.onClick.AddListener(() => {
+                storyManager.ReiniciarJuego();
+            });
+        }
+
+        if (distanceTracker != null)
+        {
+            distanceTracker.OnDistanciaActualizada += ActualizarBilletera;
+            ActualizarBilletera(distanceTracker.distanciaAcumulada);
+        }
+
+        // Estado inicial de pantallas
+        if (pantallaHistoria != null) pantallaHistoria.SetActive(false);
+        if (pantallaFinal != null) pantallaFinal.SetActive(false);
+        if (panelAlertaMetros != null) panelAlertaMetros.SetActive(false);
+    }
+
+    void OnDestroy()
+    {
+        if (distanceTracker != null)
+        {
+            distanceTracker.OnDistanciaActualizada -= ActualizarBilletera;
+        }
     }
 
     public void MostrarNodo(StoryNode nodo)
     {
-        textoNodo.text = nodo.texto;
-        textoOpcion1.text = $"{nodo.opciones[0].texto}\n{nodo.opciones[0].costo}m";
-        textoOpcion2.text = $"{nodo.opciones[1].texto}\n{nodo.opciones[1].costo}m";
+        if (nodo == null) return;
+        if (textoNodo != null) textoNodo.text = nodo.texto;
+        if (textoOpcion1 != null && nodo.opciones != null && nodo.opciones.Length > 0)
+            textoOpcion1.text = $"{nodo.opciones[0].texto}\n{nodo.opciones[0].costo}m";
+        if (textoOpcion2 != null && nodo.opciones != null && nodo.opciones.Length > 1)
+            textoOpcion2.text = $"{nodo.opciones[1].texto}\n{nodo.opciones[1].costo}m";
     }
 
     public void MostrarPantallaHistoria()
@@ -80,66 +98,57 @@ public class UIManager : MonoBehaviour
     private IEnumerator MostrarPantallaHistoriaCoroutine()
     {
         yield return null;
-        pantallaDistancia.SetActive(false);
-        pantallaFinal.SetActive(false);
-        pantallaObjetivo.SetActive(false);
+        if (pantallaFinal != null) pantallaFinal.SetActive(false);
+        if (panelAlertaMetros != null) panelAlertaMetros.SetActive(false);
         yield return null;
-        pantallaHistoria.SetActive(true);
+        if (pantallaHistoria != null) pantallaHistoria.SetActive(true);
     }
 
-    public void MostrarPantallaDistancia(int costo)
+    public void MostrarAlertaMetrosInsuficientes(int costoRequerido, float metrosActuales)
     {
-        textoObjetivo.text = "Objetivo: " + costo + "m";
-        StartCoroutine(MostrarPantallaDistanciaCoroutine());
-        pantallaFinal.SetActive(false);
-        pantallaObjetivo.SetActive(false);
+        if (textoAlertaMetros != null)
+        {
+            textoAlertaMetros.text = "No posees los metros recorridos suficientes. Sal a caminar para desbloquear esta parte de la historia.";
+        }
+        if (panelAlertaMetros != null)
+        {
+            panelAlertaMetros.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("No posees los metros recorridos suficientes. Sal a caminar para desbloquear esta parte de la historia.");
+        }
     }
 
-    private IEnumerator MostrarPantallaDistanciaCoroutine()
+    public void OcultarAlertaMetros()
     {
-        yield return null;
-        pantallaHistoria.SetActive(false);
-        yield return null;
-        pantallaDistancia.SetActive(true);
-    }
-
-    public void MostrarPantallaObjetivo(float distancia)
-    {
-        Debug.Log($"MostrarPantallaObjetivo llamado - distancia: {distancia}");
-        textoDistanciaRecorrida.text = $"Has recorrido {distancia:F0} metros";
-        StartCoroutine(MostrarPantallaObjetivoCoroutine());
-    }
-
-    private IEnumerator MostrarPantallaObjetivoCoroutine()
-    {
-        yield return null;
-        pantallaHistoria.SetActive(false);
-        pantallaDistancia.SetActive(false);
-        pantallaFinal.SetActive(false);
-        yield return null;
-        pantallaObjetivo.SetActive(true);
-        Debug.Log($"pantallaObjetivo activa: {pantallaObjetivo.activeSelf}");
+        if (panelAlertaMetros != null)
+        {
+            panelAlertaMetros.SetActive(false);
+        }
     }
 
     public void MostrarPantallaFinal(string texto)
     {
-        textoFinal.text = texto;
+        if (textoFinal != null) textoFinal.text = texto;
         StartCoroutine(MostrarPantallaFinalCoroutine());
     }
 
     private IEnumerator MostrarPantallaFinalCoroutine()
     {
         yield return null;
-        pantallaHistoria.SetActive(false);
-        pantallaDistancia.SetActive(false);
-        pantallaObjetivo.SetActive(false);
+        if (pantallaHistoria != null) pantallaHistoria.SetActive(false);
+        if (panelAlertaMetros != null) panelAlertaMetros.SetActive(false);
         yield return null;
-        pantallaFinal.SetActive(true);
+        if (pantallaFinal != null) pantallaFinal.SetActive(true);
     }
 
-    public void ActualizarDistancia(float actual, float objetivo)
+    public void ActualizarBilletera(float metros)
     {
-        textoObjetivo.text = $"Objetivo: {actual:F0}m / {objetivo}m";
+        if (textoBilleteraMetros != null)
+        {
+            textoBilleteraMetros.text = $"Metros: {metros:F0}m";
+        }
     }
 
     void IrAMenuHistorias()

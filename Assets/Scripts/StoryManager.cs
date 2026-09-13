@@ -5,19 +5,15 @@ public class StoryManager : MonoBehaviour
     public StoryNode nodoInicial;
     public StoryNode[] todosLosNodos;
 
+    public event System.Action<StoryNode> OnNodeReached;
+
     private StoryNode nodoActual;
-    private StoryNode nodoPendiente;
-    private int costoPendiente;
-    private bool esperandoDistancia = false;
-    private bool objetivoCompletado = false;
     private bool inicializado = false;
     private bool historiaTerminada = false;
 
     private UIManager uiManager;
     private DistanceTracker distanceTracker;
     private SaveSystem saveSystem;
-
-    private float tiempoGuardado = 0f;
 
     void Start()
     {
@@ -42,192 +38,119 @@ public class StoryManager : MonoBehaviour
 
     void NuevaPartida()
     {
+        historiaTerminada = false;
         nodoActual = nodoInicial;
-        if (nodoActual.EsFinal)
-        {
-            uiManager.MostrarPantallaFinal(nodoActual.texto);
-        }
-        else
-        {
-            uiManager.MostrarNodo(nodoActual);
-            uiManager.MostrarPantallaHistoria();
-        }
-        GuardarEstadoActual();
-    }
-
-    void Update()
-    {
-        if (esperandoDistancia)
-        {
-            uiManager.ActualizarDistancia(distanceTracker.distanciaAcumulada, costoPendiente);
-
-            tiempoGuardado += Time.deltaTime;
-            if (tiempoGuardado >= 5f)
-            {
-                tiempoGuardado = 0f;
-                GuardarEstadoActual();
-            }
-
-            if (distanceTracker.distanciaAcumulada >= costoPendiente)
-            {
-                esperandoDistancia = false;
-                objetivoCompletado = true;
-                saveSystem.GuardarProgreso(
-                    nodoActual.id,
-                    nodoPendiente.id,
-                    distanceTracker.distanciaAcumulada,
-                    costoPendiente,
-                    EstadoJuego.ObjetivoCompletado
-                );
-                uiManager.MostrarPantallaObjetivo(distanceTracker.distanciaAcumulada);
-            }
-        }
-    }
-
-    public void ElegirOpcion(int indice)
-    {
-        if (indice < 0 || indice >= nodoActual.opciones.Length) return;
-
-        Opcion opcionElegida = nodoActual.opciones[indice];
-        nodoPendiente = opcionElegida.siguienteNodo;
-        costoPendiente = opcionElegida.costo;
-
-        distanceTracker.totalDistance = 0f;
-        distanceTracker.distanciaAcumulada = 0f;
-
-        esperandoDistancia = true;
-        objetivoCompletado = false;
-        GuardarEstadoActual();
-        uiManager.MostrarPantallaDistancia(costoPendiente);
-    }
-
-    public void CompletarObjetivo()
-    {
-        esperandoDistancia = false;
-        objetivoCompletado = true;
-        saveSystem.GuardarProgreso(
-            nodoActual.id,
-            nodoPendiente.id,
-            distanceTracker.distanciaAcumulada,
-            costoPendiente,
-            EstadoJuego.ObjetivoCompletado
-        );
-        uiManager.MostrarPantallaObjetivo(costoPendiente);
-    }
-
-    public void CompletarDistancia()
-    {
-        objetivoCompletado = false;
-        nodoActual = nodoPendiente;
-        nodoPendiente = null;
 
         if (nodoActual.EsFinal)
         {
             historiaTerminada = true;
-            objetivoCompletado = false;
-            saveSystem.GuardarProgreso(
-                nodoActual.id,
-                0,
-                0f,
-                0,
-                EstadoJuego.Final
-            );
             uiManager.MostrarPantallaFinal(nodoActual.texto);
         }
         else
         {
             uiManager.MostrarNodo(nodoActual);
             uiManager.MostrarPantallaHistoria();
-            GuardarEstadoActual();
         }
+
+        OnNodeReached?.Invoke(nodoActual);
+        GuardarEstadoActual();
+    }
+
+    public void ElegirOpcion(int indice)
+    {
+        if (nodoActual == null || nodoActual.opciones == null || indice < 0 || indice >= nodoActual.opciones.Length)
+            return;
+
+        Opcion opcionElegida = nodoActual.opciones[indice];
+
+        // Verificamos si posee los metros necesarios en la billetera
+        if (distanceTracker.TieneMetrosSuficientes(opcionElegida.costo))
+        {
+            distanceTracker.ConsumirMetros(opcionElegida.costo);
+            AvanzarANodo(opcionElegida.siguienteNodo);
+        }
+        else
+        {
+            // Saldo insuficiente: mostrar cartel de alerta sin avanzar de nodo
+            uiManager.MostrarAlertaMetrosInsuficientes(opcionElegida.costo, distanceTracker.distanciaAcumulada);
+        }
+    }
+
+    private void AvanzarANodo(StoryNode siguienteNodo)
+    {
+        if (siguienteNodo == null)
+        {
+            Debug.LogError("El siguiente nodo no está configurado.");
+            return;
+        }
+
+        nodoActual = siguienteNodo;
+
+        if (nodoActual.EsFinal)
+        {
+            historiaTerminada = true;
+            uiManager.MostrarPantallaFinal(nodoActual.texto);
+        }
+        else
+        {
+            uiManager.MostrarNodo(nodoActual);
+            uiManager.MostrarPantallaHistoria();
+        }
+
+        OnNodeReached?.Invoke(nodoActual);
+        GuardarEstadoActual();
     }
 
     void GuardarEstadoActual()
     {
-        EstadoJuego estado;
+        EstadoJuego estado = historiaTerminada ? EstadoJuego.Final : EstadoJuego.Historia;
         int nodoActualId = nodoActual != null ? nodoActual.id : 0;
-        int nodoPendienteId = nodoPendiente != null ? nodoPendiente.id : 0;
-
-        if (historiaTerminada)
-            estado = EstadoJuego.Final;
-        if (esperandoDistancia)
-            estado = EstadoJuego.Caminando;
-        else if (objetivoCompletado)
-            estado = EstadoJuego.ObjetivoCompletado;
-        else
-            estado = EstadoJuego.Historia;
 
         saveSystem.GuardarProgreso(
             nodoActualId,
-            nodoPendienteId,
             distanceTracker.distanciaAcumulada,
-            costoPendiente,
             estado
         );
     }
 
     void CargarPartida()
     {
-        Debug.Log($"RAW PlayerPrefs - estado: {PlayerPrefs.GetInt("estadoJuego", -1)} | nodoActual: {PlayerPrefs.GetInt("nodoActualId", -1)} | nodoPendiente: {PlayerPrefs.GetInt("nodoPendienteId", -1)}");
         EstadoJuego estado = saveSystem.CargarEstado();
         int nodoActualId = saveSystem.CargarNodoActualId();
-        int nodoPendienteId = saveSystem.CargarNodoPendienteId();
         float distanciaGuardada = saveSystem.CargarDistancia();
-        costoPendiente = saveSystem.CargarCosto();
 
-        Debug.Log($"CARGANDO - Estado: {estado} | NodoActual: {nodoActualId} | NodoPendiente: {nodoPendienteId} | Distancia: {distanciaGuardada} | Costo: {costoPendiente}");
+        distanceTracker.distanciaAcumulada = distanciaGuardada;
 
         foreach (StoryNode nodo in todosLosNodos)
         {
-            if (nodo.id == nodoActualId) nodoActual = nodo;
-            if (nodo.id == nodoPendienteId) nodoPendiente = nodo;
+            if (nodo != null && nodo.id == nodoActualId)
+            {
+                nodoActual = nodo;
+                break;
+            }
         }
 
         if (nodoActual == null)
         {
-            Debug.Log("Nodo no encontrado, nueva partida");
+            Debug.Log("Nodo no encontrado, iniciando nueva partida");
             saveSystem.BorrarProgreso();
             NuevaPartida();
             return;
         }
 
-        distanceTracker.distanciaAcumulada = distanciaGuardada;
-        distanceTracker.totalDistance = 0f;
-
-        esperandoDistancia = false;
-        objetivoCompletado = false;
-
-        switch (estado)
+        if (estado == EstadoJuego.Final || nodoActual.EsFinal)
         {
-            case EstadoJuego.Historia:
-                if (nodoActual.EsFinal)
-                {
-                    uiManager.MostrarPantallaFinal(nodoActual.texto);
-                }
-                else
-                {
-                    uiManager.MostrarNodo(nodoActual);
-                    uiManager.MostrarPantallaHistoria();
-                }
-                break;
-
-            case EstadoJuego.Caminando:
-                esperandoDistancia = true;
-                objetivoCompletado = false;
-                uiManager.MostrarPantallaDistancia(costoPendiente);
-                break;
-
-            case EstadoJuego.ObjetivoCompletado:
-                esperandoDistancia = false;
-                objetivoCompletado = true;
-                uiManager.MostrarPantallaObjetivo(costoPendiente);
-                GuardarEstadoActual();
-                break;
-
-            case EstadoJuego.Final:
-                uiManager.MostrarPantallaFinal(nodoActual.texto);
-                break;
+            historiaTerminada = true;
+            uiManager.MostrarPantallaFinal(nodoActual.texto);
         }
+        else
+        {
+            historiaTerminada = false;
+            uiManager.MostrarNodo(nodoActual);
+            uiManager.MostrarPantallaHistoria();
+        }
+
+        OnNodeReached?.Invoke(nodoActual);
     }
 
     void OnApplicationPause(bool pausado)
@@ -237,23 +160,25 @@ public class StoryManager : MonoBehaviour
         if (pausado)
         {
             GuardarEstadoActual();
-            Debug.Log($"PAUSANDO - Estado guardado | esperandoDistancia: {esperandoDistancia} | objetivoCompletado: {objetivoCompletado}");
+            Debug.Log("PAUSANDO - Estado guardado.");
         }
+    }
+
+    void OnApplicationQuit()
+    {
+        if (!inicializado) return;
+        GuardarEstadoActual();
+        Debug.Log("SALIENDO - Estado guardado.");
     }
 
     public void ReiniciarJuego()
     {
         historiaTerminada = false;
-        esperandoDistancia = false;
-        objetivoCompletado = false;
-        nodoPendiente = null;
-        costoPendiente = 0;
         nodoActual = nodoInicial;
-        distanceTracker.totalDistance = 0f;
-        distanceTracker.distanciaAcumulada = 0f;
-        saveSystem.BorrarProgreso();
+        // No se resetea distanceTracker para conservar el banco global de metros
         uiManager.MostrarNodo(nodoActual);
         uiManager.MostrarPantallaHistoria();
+        OnNodeReached?.Invoke(nodoActual);
         GuardarEstadoActual();
     }
 }
