@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "624187397893",
+    "project_id": "tesis-d7460",
+    "firebase_url": "https://tesis-d7460-default-rtdb.firebaseio.com",
+    "storage_bucket": "tesis-d7460.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624187397893:android:e0bed96678f8e12457496c",
+        "android_client_info": {
+          "package_name": "com.Ignacio.Tesis"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6-VCiWUS3qjNITxOrlOYmzA3bFKP0vl4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

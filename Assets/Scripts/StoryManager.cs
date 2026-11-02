@@ -6,6 +6,9 @@ public class StoryManager : MonoBehaviour
     public StoryNode[] todosLosNodos;
 
     public event System.Action<StoryNode> OnNodeReached;
+    public event System.Action<StoryNode, Opcion, int> OnOptionSelected;
+    public event System.Action<StoryNode> OnStoryCompleted;
+    public event System.Action<Opcion, float> OnInsufficientMetersAlert;
 
     private StoryNode nodoActual;
     private bool inicializado = false;
@@ -20,6 +23,8 @@ public class StoryManager : MonoBehaviour
         uiManager = GetComponent<UIManager>();
         distanceTracker = GetComponent<DistanceTracker>();
         saveSystem = GetComponent<SaveSystem>();
+
+        TelemetryManager.Instance?.RegistrarStoryManager(this);
 
         if (saveSystem.TieneProgreso())
         {
@@ -44,6 +49,7 @@ public class StoryManager : MonoBehaviour
         if (nodoActual.EsFinal)
         {
             historiaTerminada = true;
+            OnStoryCompleted?.Invoke(nodoActual);
             uiManager.MostrarPantallaFinal(nodoActual.texto);
         }
         else
@@ -63,6 +69,9 @@ public class StoryManager : MonoBehaviour
 
         Opcion opcionElegida = nodoActual.opciones[indice];
 
+        // Telemetría: evento explícito de selección de opción
+        OnOptionSelected?.Invoke(nodoActual, opcionElegida, indice);
+
         // Verificamos si posee los metros necesarios en la billetera
         if (distanceTracker.TieneMetrosSuficientes(opcionElegida.costo))
         {
@@ -71,7 +80,9 @@ public class StoryManager : MonoBehaviour
         }
         else
         {
-            // Saldo insuficiente: mostrar cartel de alerta sin avanzar de nodo
+            // Saldo insuficiente: telemetría de fricción y visualización en UI
+            float metrosFaltantes = opcionElegida.costo - distanceTracker.distanciaAcumulada;
+            OnInsufficientMetersAlert?.Invoke(opcionElegida, metrosFaltantes);
             uiManager.MostrarAlertaMetrosInsuficientes(opcionElegida.costo, distanceTracker.distanciaAcumulada);
         }
     }
@@ -89,6 +100,7 @@ public class StoryManager : MonoBehaviour
         if (nodoActual.EsFinal)
         {
             historiaTerminada = true;
+            OnStoryCompleted?.Invoke(nodoActual);
             uiManager.MostrarPantallaFinal(nodoActual.texto);
         }
         else
@@ -104,29 +116,39 @@ public class StoryManager : MonoBehaviour
     void GuardarEstadoActual()
     {
         EstadoJuego estado = historiaTerminada ? EstadoJuego.Final : EstadoJuego.Historia;
-        int nodoActualId = nodoActual != null ? nodoActual.id : 0;
+        string nodeId = nodoActual != null ? nodoActual.NodeId : "";
+        int nodeIntId = nodoActual != null ? nodoActual.id : 0;
+        int historiaId = PlayerPrefs.GetInt("historiaSeleccionada", 1);
 
-        saveSystem.GuardarProgreso(
-            nodoActualId,
+        GameSaveData data = new GameSaveData(
+            nodeId,
+            nodeIntId,
             distanceTracker.distanciaAcumulada,
-            estado
+            estado,
+            historiaId
         );
+
+        saveSystem.GuardarProgreso(data);
     }
 
     void CargarPartida()
     {
-        EstadoJuego estado = saveSystem.CargarEstado();
-        int nodoActualId = saveSystem.CargarNodoActualId();
-        float distanciaGuardada = saveSystem.CargarDistancia();
+        GameSaveData data = saveSystem.CargarProgreso();
 
-        distanceTracker.distanciaAcumulada = distanciaGuardada;
+        distanceTracker.distanciaAcumulada = data.accumulatedDistance;
 
+        // Búsqueda por NodeId (string) con fallback a id (int) para compatibilidad
         foreach (StoryNode nodo in todosLosNodos)
         {
-            if (nodo != null && nodo.id == nodoActualId)
+            if (nodo != null)
             {
-                nodoActual = nodo;
-                break;
+                bool coincideString = !string.IsNullOrEmpty(data.currentNodeId) && nodo.NodeId == data.currentNodeId;
+                bool coincideInt = nodo.id == data.currentNodeIntId;
+                if (coincideString || coincideInt)
+                {
+                    nodoActual = nodo;
+                    break;
+                }
             }
         }
 
@@ -138,9 +160,10 @@ public class StoryManager : MonoBehaviour
             return;
         }
 
-        if (estado == EstadoJuego.Final || nodoActual.EsFinal)
+        if (data.gameState == EstadoJuego.Final || nodoActual.EsFinal)
         {
             historiaTerminada = true;
+            OnStoryCompleted?.Invoke(nodoActual);
             uiManager.MostrarPantallaFinal(nodoActual.texto);
         }
         else
@@ -180,5 +203,10 @@ public class StoryManager : MonoBehaviour
         uiManager.MostrarPantallaHistoria();
         OnNodeReached?.Invoke(nodoActual);
         GuardarEstadoActual();
+    }
+
+    void OnDestroy()
+    {
+        TelemetryManager.Instance?.DesvincularStoryManager(this);
     }
 }

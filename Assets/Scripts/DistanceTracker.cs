@@ -7,11 +7,15 @@ public class DistanceTracker : MonoBehaviour
     public bool autoIniciarTracking = true;
 
     public event System.Action<float> OnDistanciaActualizada;
+    public event System.Action<float, float, bool> OnDistanceRecorded; // (deltaMetros, saldoAcumulado, esSimulado)
+    public event System.Action<float, float> OnMetersConsumed;      // (metrosConsumidos, saldoRestante)
+    public event System.Action<float, float> OnWalkSessionEnded;     // (distanciaTotalSesion, duracionSegundos)
 
     private int warmupSamples = 10;
     private int currentSamples = 0;
 
     private bool isTracking = false;
+    private float sessionStartTime = 0f;
 
     private Vector2 lastPosition;
     public float totalDistance = 0f;
@@ -32,6 +36,13 @@ public class DistanceTracker : MonoBehaviour
         {
             StartCoroutine(StartTracking());
         }
+
+        TelemetryManager.Instance?.RegistrarDistanceTracker(this);
+    }
+
+    void OnDestroy()
+    {
+        TelemetryManager.Instance?.DesvincularDistanceTracker(this);
     }
 
 
@@ -68,16 +79,22 @@ public class DistanceTracker : MonoBehaviour
 
         totalDistance = 0f;
         lastPosition = Vector2.zero;
+        sessionStartTime = Time.time;
 
         isTracking = true;
         StartCoroutine(UpdateDistance());
     }
 
-    void StopTracking()
+    public void StopTracking()
     {
+        if (!isTracking) return;
+
         isTracking = false;
         location.Stop();
-        Debug.Log("Distancia final: " + totalDistance + " metros");
+
+        float sessionDuration = Time.time - sessionStartTime;
+        OnWalkSessionEnded?.Invoke(totalDistance, sessionDuration);
+        Debug.Log($"Sesión de caminata finalizada: {totalDistance:F1}m en {sessionDuration:F1}s");
     }
 
     IEnumerator UpdateDistance()
@@ -123,6 +140,7 @@ public class DistanceTracker : MonoBehaviour
                         distanciaAcumulada += distance;
                         PlayerPrefs.SetFloat("distanciaAcumulada", distanciaAcumulada);
                         OnDistanciaActualizada?.Invoke(distanciaAcumulada);
+                        OnDistanceRecorded?.Invoke(distance, distanciaAcumulada, false);
                     }
                 }
 
@@ -164,6 +182,7 @@ public class DistanceTracker : MonoBehaviour
             PlayerPrefs.SetFloat("distanciaAcumulada", distanciaAcumulada);
             PlayerPrefs.Save();
             OnDistanciaActualizada?.Invoke(distanciaAcumulada);
+            OnMetersConsumed?.Invoke(metrosAConsumir, distanciaAcumulada);
             return true;
         }
         return false;
@@ -178,6 +197,7 @@ public class DistanceTracker : MonoBehaviour
             PlayerPrefs.SetFloat("distanciaAcumulada", distanciaAcumulada);
             PlayerPrefs.Save();
             OnDistanciaActualizada?.Invoke(distanciaAcumulada);
+            OnDistanceRecorded?.Invoke(metros, distanciaAcumulada, true);
         }
     }
 
